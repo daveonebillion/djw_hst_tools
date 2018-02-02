@@ -1,4 +1,4 @@
-hst_lightcurves
+# hst_lightcurves
 
 lc_extractor is a script to extract a lightcurve from HST/COS corrtag files
 Tested on FUV so far, NUV to come.
@@ -11,7 +11,9 @@ Optional: Plots combined lightcurve.
 
 Usage: call the function lc_maker()
 
+```python
 lc_extractor.lc_maker(star='unknown', file_path=os.getcwd()+'/', save_path=os.getcwd()+'/lightcurves/', bin_time=1., plot=True)
+```
 
 Arguments: 
 	-star = string, what you want the combined line curve to be called. 
@@ -23,8 +25,8 @@ Arguments:
 	- plot = boolean, makes a plot of the combined lightcurve. Default is true.
 	
 Outputs: 
-	- Lightcurve of each exposure saved as [exposure rootname]_[bintime]s_lc.dat.
+	<pre>- Lightcurve of each exposure saved as [exposure rootname]_[bintime]s_lc.dat.
 	- Combined lightcurve saved as [star]_[bin_time]s_lc_combined.dat.
-	Lightcurves saved as time(s since MJD=0) counts(s-1) error(s-1). 
+	Lightcurves saved as time(s since MJD=0) counts(s-1) error(s-1). <\pre>
 
 What about STIS? STIS is hard, so I may add it in the future but no promises.
