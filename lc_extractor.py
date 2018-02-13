@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import glob
 import astropy.io.fits as fits
 import os
-import sys
-
 
 """
 Script to extract a lightcurve from HST/COS corrtag files
@@ -27,8 +25,9 @@ Arguments:
 	- file_path = string, where your corrtag files are. Default is the curret directory.
 	- save_path = sring, where you want the output to be saves. 
 	Default is a new "lightcurves" directory in the current directory
-	- bin_time = float, time in s to bin the lightcurve to. Default is 1s.
-	- plot = boolean, makes a plot of the combined lightcurve. Default is true.
+	- bin_time = float, time in s to bin the lightcurve to. Default is 1.0s.
+	- qual_check = boolean, masks out flagged pixels. Default is True.
+	- plot = boolean, makes a plot of the combined lightcurve. Default is True.
 	
 Outputs: 
 	- Lightcurve of each exposure saved as [exposure rootname]_[bintime]s_lc.dat.
@@ -52,7 +51,9 @@ def filewriter(time, counts, error, save_path, filename):
 	for t, c, e in zip(time, counts, error):
 	  fl.write('%f %f %f\n'%(t, c, e))
 
-def lc_maker(star='unknown', file_path=os.getcwd()+'/', save_path=os.getcwd()+'/lightcurves/', bin_time=1., plot=True):
+def lc_maker(star='unknown', file_path=os.getcwd()+'/', 
+             save_path=os.getcwd()+'/lightcurves/', bin_time=1., 
+             qual_check=True, plot=True):
 
 	#find the corrtag files, and end the script if there aren't any
 	tag_files = glob.glob(file_path+'*corrtag*')
@@ -115,10 +116,11 @@ def lc_maker(star='unknown', file_path=os.getcwd()+'/', save_path=os.getcwd()+'/
 			dq = data['DQ']
 			
 			#mask out flagged pixels
-			x, y, time, w = x[dq==0], y[dq==0], time[dq==0], w[dq==0]
+			if qual_check == True:
+				x, y, time, w = x[dq==0], y[dq==0], time[dq==0], w[dq==0]
 			
 			#mask out airglow from lyman alpha and oi
-			wave_mask = (w < 1210.)|(w > 1220.)&(w < 1300.)|(w > 1310.)
+			wave_mask = (w < 1214.)|(w > 1217.)&(w < 1301.)|(w > 1307.)
 			x, y, time = x[wave_mask], y[wave_mask], time[wave_mask]
 			
 			#extract lightcurve from spectrum
@@ -136,11 +138,14 @@ def lc_maker(star='unknown', file_path=os.getcwd()+'/', save_path=os.getcwd()+'/
 			#background subtraction 
 			counts_bksub = sp_counts - bk_counts 
 			
-			#combine a and b segments
-			if seg == 'A':
-				counts = counts_bksub
+			#combine a and b segments, if both present
+			if len(segs) > 1: 
+				if seg == 'A':
+					counts = counts_bksub
+				else:
+					counts += counts_bksub
 			else:
-				counts += counts_bksub
+				counts = counts_bksub
 			
 			#calculate photon noise
 			error = counts**0.5 
