@@ -35,6 +35,7 @@ Arguments:
 	- save_path = sring, where you want the output to be saves. 
 	Default is a new "lightcurves" directory in the current directory
 	- bin_time = float, time in s to bin the lightcurve to. Default is 1s.
+	- qual_check = boolean, masks out flagged pixels. Default is True.
 	- plot = boolean, makes a plot of the combined lightcurve. Default is true.
 	
 Outputs: 
