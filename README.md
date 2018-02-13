@@ -1,4 +1,8 @@
-# hst_lightcurves
+# djw_hst_tools
+
+Repository for python scripts for working with HST spectra, based on my work for Program ID 15189. So far added a script for extracting lightcurves, more to come. 
+
+##lc_extractor
 
 lc_extractor is a script to extract a lightcurve from HST/COS corrtag files.
 
