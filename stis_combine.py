@@ -7,11 +7,12 @@ import astropy.io.fits as fits
 import glob
 
 """
-Stitches STIS echelle spectra with overlaping orders. 
 
-At each overlap it interpolates the flux of the order with smaller wavelength grid spacing onto the larger wavelength grid (although the difference is small) and coadds the fluxes.  
+Stitches together STIS echelle spectra with overlapping orders.
 
-Idealy uses x1f files produced using stisblazefix (https://stisblazefix.readthedocs.io). Can use x1d files but these are badly affected be echelle ripple.
+At each overlap it interpolates the flux of the order with smaller wavelength bins onto the larger wavelength bins (although the difference is small) and makes a weighted coadd of the fluxes and errors.
+
+Idealy uses x1f files produced using stisblazefix (https://stisblazefix.readthedocs.io). Can use x1d files but these are badly affected by echelle blaze ripple.
 
 For best results with E140M spectra, ask me to do a correction with the updated pht files first. This marginally improves on stisblazefix alone.
 
@@ -19,18 +20,18 @@ Usage:
 
 call stis_echelle_coadd()
 
-If no arguments are called, it will stitch all x1f (or x1d if no x1f files are present) in the working directory, make a new directory in the working directory and save the stiched spectra there. 
+If no arguments are called, it will stitch all x1f (or x1d if no x1f files are present) in the working directory, make a new directory in the working directory and save the stiched spectra there.
 
 Arguments:
 
 - files: Array, list of x1f or x1d files to stitch. Default = []
 
-- plot: boolean. Make a plot of the stiched spectrum at the end. Default = True
+- plot: boolean. Make a plot of the stitched spectrum at the end. Default = True
 
-- nclip: int, points to clip off each echelle order to clear up the order end problems that are inherent to stis data. 
-         I don't know a reason to change it, but the option is there. Default =5 
+- nclip: int, points to clip off each echelle order to clear up the order end problems that are inherent to stis data.
+         I don't know a reason to change it, but the option is there. Default =5
 
-- file_path: string, path to where the xld/xlf files are. Remember to include a '/' at the end. Default= working directory 
+- file_path: string, path to where the xld/xlf files are. Remember to include a '/' at the end. Default= working directory
 
 - save_path: string, directory to save the stitched spectra in. Remember to include a '/' at the end. Default = new directory 'stitched_spectra' in the working directory
 
@@ -38,7 +39,7 @@ Output:
 
 A .dat file with space-separated columns of wavelength, flux, flux_error and data quality.
 
-The flies are named using the x1d/x1f header KEYWORDS as: 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_TDATEOBS:TTIMEOBS_ROOTNAME_stitched.dat'
+The files are named using the x1d/x1f header KEYWORDS as: 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_TDATEOBS:TTIMEOBS_ROOTNAME_stitched.dat'
 
 """
 
