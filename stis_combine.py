@@ -125,10 +125,10 @@ def echelle_coadd(wavelength, flux, err, dq):
     
     #stis orders are saved in reverse order, so combined spectra are sorted by the wavelength array
     arr1inds = w_full.argsort()
-    sorted_w = w_full[arr1inds[::-1]]
-    sorted_f = f_full[arr1inds[::-1]]
-    sorted_e = e_full[arr1inds[::-1]]
-    sorted_dq = dq_full[arr1inds[::-1]]
+    sorted_w = w_full[arr1inds]
+    sorted_f = f_full[arr1inds]
+    sorted_e = e_full[arr1inds]
+    sorted_dq = dq_full[arr1inds]
     
     return sorted_w, sorted_f, sorted_e, sorted_dq
 
