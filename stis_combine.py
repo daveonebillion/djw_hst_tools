@@ -72,7 +72,7 @@ def end_clip(array, nclip):
         order += 1
     return new_array
     
-def echelle_coadd(filedata):
+def echelle_coadd(wavelength, flux, err, dq):
     """
     combines echelle orders into one spectrum, stiching them together at the overlap 
     """
@@ -186,7 +186,7 @@ def stis_echelle_coadd(files=[], plot=True, nclip=5, file_path=os.getcwd()+'/', 
         wavelength = end_clip(filedata['wavelength'], nclip)
         
         #stitch the orders together
-        w, f, e, dq = echelle_coadd(filedata)
+        w, f, e, dq = echelle_coadd(wavelength, flux, err, dq)
         
         #generate the file name and save the data
         filename = hdr['TARGNAME']+'_'+hdr['INSTRUME']+'_'+hdr['DETECTOR']+'_'+hdr['OPT_ELEM']+'_'+hdr['TDATEOBS']+':'+hdr['TTIMEOBS']+'_'+hdr['ROOTNAME']+'_stitched.dat'
