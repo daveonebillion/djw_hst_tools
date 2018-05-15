@@ -6,6 +6,8 @@ Repository for python scripts for working with HST spectra, based on my work for
 
 * stis_combine: stitches STIS echelle spectra together
 
+* cos_fits_to_dat: coming soon...
+
 ## lc_extractor
 
 lc_extractor is a script to extract a lightcurve from HST/COS corrtag files.
