@@ -6,7 +6,7 @@ Repository for python scripts for working with HST spectra, based on my work for
 
 * stis_combine: stitches STIS echelle spectra together
 
-* cos_fits_to_dat: coming soon...
+* cos_fits_to_dat: turns COS xldsum files into ascii .dat files
 
 ## lc_extractor
 
@@ -89,6 +89,38 @@ Output:
 A .dat file with space-separated columns of wavelength, flux, flux_error and data quality.
 
 The files are named using the x1d/x1f header KEYWORDS as: 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_TDATEOBS:TTIMEOBS_ROOTNAME_stitched.dat'
+
+"""
+```
+
+## cos_fits_to_dat
+
+"""
+Extracts COS spectra from xldsum.fits files and saves it as an ascii .dat file with columns wavelength, flux, error, dq
+
+
+```python
+
+"""
+Usage:
+    
+call the function cos_fits_to_dat.fits_to_dat(files=[], plot=True, file_path=os.getcwd()+'/', save_path=os.getcwd()+'/spectra/', filename='long')
+
+If no arguments are called, it will extract all x1dsum.fits files in the working directory, make a new directory 'spectra' in the working directory and save the .dat files there.
+    
+Arguments:
+
+- files: Array, list of x1dsum.fits files to stitch. Default = []
+
+- plot: boolean. Make a plot of the stitched spectrum at the end. Default = True
+
+- file_path: string, path to where the xld/xlf files are. Remember to include a '/' at the end. Default= working directory
+
+- save_path: string, directory to save the stitched spectra in. Remember to include a '/' at the end. Default = new directory 'stitched_spectra' in the working directory
+
+- file_name: string, what name to save the .dat file to. Two options built in:
+    - 'long' (default) : uses header KEYWORDS to save the file as 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_DATE-OBS:TIME-OBS_ROOTNAME.dat'
+    - 'short' : saves the file as 'ROOTNAME.dat'
 
 """
 ```
