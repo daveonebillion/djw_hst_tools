@@ -50,7 +50,7 @@ for spectrum in glob.glob(data_loc+'*x1dsum.*'):
     #star = hdul[1].header['TARGNAME']
     #print(arm)
 
-
+#HELLO!!!
     #data
     #data=hdul[1].data
     
