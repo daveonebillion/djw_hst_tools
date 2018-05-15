@@ -95,8 +95,7 @@ The files are named using the x1d/x1f header KEYWORDS as: 'TARGNAME_'INSTRUME_DE
 
 ## cos_fits_to_dat
 
-"""
-Extracts COS spectra from xldsum.fits files and saves it as an ascii .dat file with columns wavelength, flux, error, dq
+Extracts COS spectra from x1dsum.fits files and saves it as an ascii .dat file with columns wavelength, flux, error, dq
 
 
 ```python
