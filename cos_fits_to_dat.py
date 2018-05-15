@@ -6,7 +6,7 @@ from astropy.convolution import convolve, Box1DKernel
 import glob
 
 """
-Extracts COS spectra from xldsum.fits files and saves it as an ascii .dat file with columns wavelength, flux, error, dq
+Extracts COS spectra from x1dsum.fits files and saves it as an ascii .dat file with columns wavelength, flux, error, dq
 
 Usage:
     
