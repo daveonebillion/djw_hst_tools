@@ -7,12 +7,11 @@ import astropy.io.fits as fits
 import glob
 
 """
+Stitches STIS echelle spectra with overlaping orders. 
 
-Stitches together STIS echelle spectra with overlapping orders.
+At each overlap it interpolates the flux of the order with smaller wavelength grid spacing onto the larger wavelength grid (although the difference is small) and coadds the fluxes.  
 
-At each overlap it interpolates the flux of the order with smaller wavelength bins onto the larger wavelength bins (although the difference is small) and makes a weighted coadd of the fluxes and errors.
-
-Idealy uses x1f files produced using stisblazefix (https://stisblazefix.readthedocs.io). Can use x1d files but these are badly affected by echelle blaze ripple.
+Idealy uses x1f files produced using stisblazefix (https://stisblazefix.readthedocs.io). Can use x1d files but these are badly affected be echelle ripple.
 
 For best results with E140M spectra, ask me to do a correction with the updated pht files first. This marginally improves on stisblazefix alone.
 
@@ -20,26 +19,30 @@ Usage:
 
 call stis_echelle_coadd()
 
-If no arguments are called, it will stitch all x1f (or x1d if no x1f files are present) in the working directory, make a new directory in the working directory and save the stiched spectra there.
+If no arguments are called, it will stitch all x1f (or x1d if no x1f files are present) in the working directory, make a new directory in the working directory and save the stiched spectra there. 
 
 Arguments:
 
 - files: Array, list of x1f or x1d files to stitch. Default = []
 
-- plot: boolean. Make a plot of the stitched spectrum at the end. Default = True
+- plot: boolean. Make a plot of the stiched spectrum at the end. Default = True
 
-- nclip: int, points to clip off each echelle order to clear up the order end problems that are inherent to stis data.
-         I don't know a reason to change it, but the option is there. Default =5
+- nclip: int, points to clip off each echelle order to clear up the order end problems that are inherent to stis data. 
+         I don't know a reason to change it, but the option is there. Default =5 
 
-- file_path: string, path to where the xld/xlf files are. Remember to include a '/' at the end. Default= working directory
+- file_path: string, path to where the xld/xlf files are. Remember to include a '/' at the end. Default= working directory 
 
 - save_path: string, directory to save the stitched spectra in. Remember to include a '/' at the end. Default = new directory 'stitched_spectra' in the working directory
+
+- file_name: string, what name to save the .dat file to. Two options built in:
+    - 'long' (default) : uses header KEYWORDS to save the file as 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_TDATEOBS:TTIMEOBS_ROOTNAME_stitched.dat'
+    - 'short' : saves the file as 'ROOTNAME.dat'
+
+-flat: Applies Knox Long's calibration flat to E140M data, currently private.
 
 Output:
 
 A .dat file with space-separated columns of wavelength, flux, flux_error and data quality.
-
-The files are named using the x1d/x1f header KEYWORDS as: 'TARGNAME_'INSTRUME_DETECTOR_OPT_ELEM_TDATEOBS:TTIMEOBS_ROOTNAME_stitched.dat'
 
 """
 
@@ -138,15 +141,18 @@ def filewriter(wavelength, flux, error, dq, save_path, filename):
     write the spectrum to file in savepath/file name in space-separated columns of wavelength, flux, flux_error, dq.
     """
     if not os.path.exists(save_path):
+        print('no')
         os.makedirs(save_path)    
     fl=open((save_path+filename),'w') 
     for w, f, e, q in zip(wavelength, flux, error, dq):
         fl.write('%f %g %g %i\n'%(w,f,e,q))
+    print('Spectrum saved as '+filename)
 
 def plot_spectrum(wavelength, flux, error, dq, rootname):
     """
     plot the spectrum, error and spectrum with flagged pixels removed
     """
+    wavelength, flux, error, dq = wavelength[wavelength > 1160], flux[wavelength > 1160], error[wavelength > 1160], dq[wavelength > 1160] #cut off the scrappy bit at the beginning of E140M spectra
     plt.figure(rootname)
     plt.plot(wavelength, flux, '0.5', label='spectrum')
     plt.plot(wavelength[dq==0], flux[dq==0], label = 'dq filtered spectrum')
@@ -154,17 +160,35 @@ def plot_spectrum(wavelength, flux, error, dq, rootname):
     plt.legend()
     plt.show()    
 
-def stis_echelle_coadd(files=[], plot=True, nclip=5, file_path=os.getcwd()+'/', save_path=os.getcwd()+'/stitched_spectra/'):
+def flat_correct(wavelength, flux, flatfile):
+    """
+    applies Knox Long's flat correction to an x1d file. Flat not yet publically available, sorry. 
+    """
+    print('Applying flat correction')
+    np.seterr(divide='ignore', invalid='ignore')
+    hdul = fits.open(flatfile)
+    flat = hdul[1].data
+    hdul.close()
+    for i in range(len(wavelength)):
+        ft = interpolate.interp1d(flat['WAVELENGTH'][i], flat['FLUX'][i],bounds_error=False, fill_value=1)
+        flux[i] /= ft(wavelength[i])
+    return flux
+    
+def stis_echelle_coadd(files=[], plot=True, nclip=15, file_path=os.getcwd()+'/', save_path=os.getcwd()+'/stitched_spectra/', flat='', filename='long'):
     """
     main funtion, gather data then stitch, coadd, save and plot them
     """
     
     #get all x1f or x1d files
     if files == []:
-        if len(glob.glob(file_path+'*x1f.fits')) > 0:
+        if len(glob.glob(file_path+'*x1d.fits')) > 0 and flat != '':
+            print('You are using x1d files with a flat.')
+            files = glob.glob(file_path+'*x1d.fits')
+        elif len(glob.glob(file_path+'*x1f.fits')) > 0:
+            print('You are using x1f files.')
             files = glob.glob(file_path+'*x1f.fits')
         elif len(glob.glob(file_path+'*x1d.fits')) > 0:
-            print('You are using x1d files. The result will be better with xlf files made using stisblazefix')
+            print('You are using x1d files. The result will be better with xlf files made using stisblazefix.')
             files = glob.glob(file_path+'*x1d.fits')
         else:
             print ('There are no x1f or x1d files in file_path :(.')
@@ -174,6 +198,7 @@ def stis_echelle_coadd(files=[], plot=True, nclip=5, file_path=os.getcwd()+'/', 
     for fitsfile in files:
         
         #get required data from the x1f/x1d
+        print('Working on '+fitsfile)
         hdul = fits.open(fitsfile)
         hdr =  hdul[0].header
         filedata = hdul[1].data
@@ -185,15 +210,24 @@ def stis_echelle_coadd(files=[], plot=True, nclip=5, file_path=os.getcwd()+'/', 
         err = end_clip(filedata['error'], nclip)
         wavelength = end_clip(filedata['wavelength'], nclip)
         
+        #apply flat correction
+        if flat != '' and hdr['OPT_ELEM'] == 'E140M':
+            flux = flat_correct(wavelength, flux, flat)
+        
         #stitch the orders together
         w, f, e, dq = echelle_coadd(wavelength, flux, err, dq)
         
         #generate the file name and save the data
-        filename = hdr['TARGNAME']+'_'+hdr['INSTRUME']+'_'+hdr['DETECTOR']+'_'+hdr['OPT_ELEM']+'_'+hdr['TDATEOBS']+':'+hdr['TTIMEOBS']+'_'+hdr['ROOTNAME']+'_stitched.dat'
-        filewriter(w, f, e, dq, save_path, filename)
+        if filename == 'long':
+            built_name = hdr['TARGNAME']+'_'+hdr['INSTRUME']+'_'+hdr['DETECTOR']+'_'+hdr['OPT_ELEM']+'_'+hdr['TDATEOBS']+':'+hdr['TTIMEOBS']+'_'+hdr['ROOTNAME']+'_stitched.dat'
+        if filename == 'short':
+            built_name = hdr['ROOTNAME']+'.dat'
+        filewriter(w, f, e, dq, save_path, built_name)
         
         #plot the finished spectrum
         if plot==True:
-            plot_spectrum(w, f, e, dq, hdr['ROOTNAME'])
+            plot_spectrum(w, f, e, dq, built_name)
 
+
+    
     
