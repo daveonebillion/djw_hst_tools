@@ -12,42 +12,39 @@ Repository for python scripts for working with HST spectra, based on my work for
 
 lc_extractor is a script to extract a lightcurve from HST/COS corrtag files.
 
-Tested on FUV so far, NUV to come.
+Requires astropy, matplotlib, numpy. 
 
-Requires astropy, matplotlib, numpy.
+Saves each FP_POS exposure separately (for FUV exposures)
 
-Saves each FP_POS exposure separately, as well as one combined file.
+For each exposure the counts from the A and B  segments (FUV) or A, B and C traces (NUV), if present, are combined.
 
-For each exposure the counts from the A and B segments, if both present, are combined.
+Airglow from Lymman alpha and ~1300A Oi is removed.
 
-Airglow from Lyman alpha and ~1300A Oi is removed.
+Error is photon noise only. 
 
-Error is photon noise only.
-
-Optional: Plots combined lightcurve.
+Optional: Plots lightcurve. 
 
 ```python
 """
 Usage: call the function lc_maker()
 
+lc_extractor.lc_maker(file_path=os.getcwd()+'/', save_path=os.getcwd()+'/lightcurves/', bin_time=1., plot=True, save_file='long')
 
-lc_extractor.lc_maker(star='unknown', file_path=os.getcwd()+'/', save_path=os.getcwd()+'/lightcurves/', bin_time=1., plot=True)
+Arguments: 
+	- file_path = string, where your corrtag files are. Default is the curret directory.
+	- save_path = sring, where you want the output to be saves. 
+	Default is a new "lightcurves" directory in the current directory
+	- bin_time = float, time in s to bin the lightcurve to. Default is 1.0s.
+	- qual_check = boolean, masks out flagged pixels. Default is True.
+	- plot = boolean, makes a plot of the combined lightcurve. Default is True.
+    - save_file = file name to save the lightcurves as. Default is 'long':
+        - 'long' = targname_band_expstart_rootname_bintime_lc.dat'
+        - 'short' = rootname_bintime_lc.dat
+	
+Outputs: 
+	- Lightcurve of each exposure saved as [exposure rootname]_[bintime]s_lc.dat.
+	Lightcurves saved as time(s since MJD=0) counts(s-1) error(s-1). 
 
-
-Arguments:
-    -star = string, what you want the combined line curve to be called.
-    Default is to use the 'TARGNAME' keyword in the first corrtag file it comes across.
-    - file_path = string, where your corrtag files are. Default is the current directory.
-    - save_path = string, where you want the output to be saves.
-    Default is a new "lightcurves" directory in the current directory
-    - bin_time = float, time in s to bin the lightcurve to. Default is 1s.
-    - qual_check = boolean, masks out flagged pixels. Default is True.
-    - plot = boolean, makes a plot of the combined lightcurve. Default is true.
-    
-Outputs:
-    - Lightcurve of each exposure saved as [exposure rootname]_[bintime]s_lc.dat.
-    - Combined lightcurve saved as [star]_[bin_time]s_lc_combined.dat.
-    Lightcurves saved as time(s since MJD=0) counts(s-1) error(s-1).
 """
 ```
 What about STIS? STIS is hard, so I may add it in the future but no promises.
