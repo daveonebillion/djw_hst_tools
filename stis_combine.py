@@ -141,7 +141,6 @@ def filewriter(wavelength, flux, error, dq, save_path, filename):
     write the spectrum to file in savepath/file name in space-separated columns of wavelength, flux, flux_error, dq.
     """
     if not os.path.exists(save_path):
-        print('no')
         os.makedirs(save_path)    
     fl=open((save_path+filename),'w') 
     for w, f, e, q in zip(wavelength, flux, error, dq):
@@ -160,7 +159,7 @@ def plot_spectrum(wavelength, flux, error, dq, rootname):
     plt.legend()
     plt.show()    
 
-def flat_correct(wavelength, flux, flatfile):
+def flat_correct(wavelength, flux, error, flatfile):
     """
     applies Knox Long's flat correction to an x1d file. Flat not yet publically available, sorry. 
     """
@@ -172,7 +171,8 @@ def flat_correct(wavelength, flux, flatfile):
     for i in range(len(wavelength)):
         ft = interpolate.interp1d(flat['WAVELENGTH'][i], flat['FLUX'][i],bounds_error=False, fill_value=1)
         flux[i] /= ft(wavelength[i])
-    return flux
+        error[i] /= ft(wavelength[i])
+    return flux, error
     
 def stis_echelle_coadd(files=[], plot=True, nclip=15, file_path=os.getcwd()+'/', save_path=os.getcwd()+'/stitched_spectra/', flat='', filename='long'):
     """
@@ -212,7 +212,7 @@ def stis_echelle_coadd(files=[], plot=True, nclip=15, file_path=os.getcwd()+'/',
         
         #apply flat correction
         if flat != '' and hdr['OPT_ELEM'] == 'E140M':
-            flux = flat_correct(wavelength, flux, flat)
+            flux, err = flat_correct(wavelength, flux, err, flat)
         
         #stitch the orders together
         w, f, e, dq = echelle_coadd(wavelength, flux, err, dq)
@@ -229,5 +229,4 @@ def stis_echelle_coadd(files=[], plot=True, nclip=15, file_path=os.getcwd()+'/',
             plot_spectrum(w, f, e, dq, built_name)
 
 
-    
     
