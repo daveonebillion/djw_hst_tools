@@ -57,8 +57,6 @@ At each overlap it interpolates the flux of the order with smaller wavelength bi
 
 Idealy uses x1f files produced using stisblazefix (https://stisblazefix.readthedocs.io). Can use x1d files but these are badly affected by echelle blaze ripple.
 
-For best results with E140M spectra, ask me to do a correction with the updated pht files first. This marginally improves on stisblazefix alone.
-
 ```python
 
 """
